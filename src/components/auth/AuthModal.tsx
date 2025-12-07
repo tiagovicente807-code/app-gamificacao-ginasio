@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Mail, Lock, User, Building2, Chrome } from "lucide-react";
-import { signUp, signIn, signInWithGoogle } from "@/lib/auth";
+import { X, Mail, Lock, User, Building2 } from "lucide-react";
+import { signUp, signIn } from "@/lib/auth";
 import { getGyms } from "@/lib/gym-service";
 
 type AuthModalProps = {
@@ -56,20 +56,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       onClose();
     } catch (err: any) {
       setError(err.message || "Erro ao autenticar");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      await signInWithGoogle();
-      onSuccess();
-      onClose();
-    } catch (err: any) {
-      setError(err.message || "Erro ao autenticar com Google");
     } finally {
       setLoading(false);
     }
@@ -193,24 +179,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             {loading ? "Carregando..." : mode === "signin" ? "Entrar" : "Criar Conta"}
           </button>
         </form>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">ou</span>
-          </div>
-        </div>
-
-        <button
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 font-medium py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Chrome className="w-5 h-5" />
-          Continuar com Google
-        </button>
 
         <div className="mt-6 text-center">
           <button
