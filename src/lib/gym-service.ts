@@ -183,10 +183,7 @@ export async function getActiveChallenges() {
 export async function getUserChallenges(userId: string) {
   const { data, error } = await supabase
     .from('user_challenges')
-    .select(`
-      *,
-      challenges (*)
-    `)
+    .select('*')
     .eq('user_id', userId);
 
   if (error) throw error;
@@ -283,19 +280,36 @@ export async function getAllBadges() {
   return data;
 }
 
-// Get user badges
+// Get user badges - CORRIGIDO: busca separada sem JOIN
 export async function getUserBadges(userId: string) {
-  const { data, error } = await supabase
+  // Buscar user_badges do usuário
+  const { data: userBadgesData, error: userBadgesError } = await supabase
     .from('user_badges')
-    .select(`
-      *,
-      badges (*)
-    `)
+    .select('*')
     .eq('user_id', userId)
     .order('unlocked_at', { ascending: false });
 
-  if (error) throw error;
-  return data;
+  if (userBadgesError) throw userBadgesError;
+  
+  // Se não tem badges, retornar array vazio
+  if (!userBadgesData || userBadgesData.length === 0) {
+    return [];
+  }
+
+  // Buscar os badges correspondentes
+  const badgeIds = userBadgesData.map(ub => ub.badge_id);
+  const { data: badgesData, error: badgesError } = await supabase
+    .from('badges')
+    .select('*')
+    .in('id', badgeIds);
+
+  if (badgesError) throw badgesError;
+
+  // Combinar os dados manualmente
+  return userBadgesData.map(userBadge => ({
+    ...userBadge,
+    badges: badgesData?.find(b => b.id === userBadge.badge_id) || null
+  }));
 }
 
 // Check and unlock badges
